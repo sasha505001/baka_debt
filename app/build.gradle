@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    id 'kotlin-kapt'
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt' // если используешь Room
+    id 'androidx.navigation.safeargs.kotlin' // если используешь SafeArgs
 }
-
 android {
     namespace 'com.example.sporttracker'
     compileSdk 35
@@ -42,10 +42,7 @@ dependencies {
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Обычно полезно для гибких макетов, если его нет
-    testImplementation libs.junit
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.espresso.core
+    implementation libs.constraintlayout
 
     // Room Database
     implementation libs.room.runtime
@@ -64,4 +61,9 @@ dependencies {
     // Navigation Component
     implementation libs.navigation.fragment.ktx
     implementation libs.navigation.ui.ktx
+
+    // Tests
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
 }
