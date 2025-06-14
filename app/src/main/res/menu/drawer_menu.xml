@@ -1,0 +1,27 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/workoutRoutinesFragment"
+            android:icon="@drawable/ic_fitness"
+            android:title="Комплексы" />
+        <item
+            android:id="@+id/exerciseListFragment"
+            android:icon="@drawable/ic_exercise"
+            android:title="Упражнения" />
+        <item
+            android:id="@+id/trainingHistoryFragment"
+            android:icon="@drawable/ic_history"
+            android:title="История тренировок" />
+        <item
+            android:id="@+id/foodSupplementsFragment"
+            android:icon="@drawable/ic_supplements"
+            android:title="Пищевые добавки" />
+    </group>
+</menu>
+
+    

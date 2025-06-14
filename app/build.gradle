@@ -46,6 +46,7 @@ dependencies {
 
     // Room Database
     implementation libs.room.runtime
+    implementation libs.androidx.activity
     kapt libs.room.compiler // Важно: для Room compiler используем 'kapt'
     implementation libs.room.ktx // Для корутин в Room
 
