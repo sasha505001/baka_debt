@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id 'org.jetbrains.kotlin.kapt'
+    alias(libs.plugins.navigation.safeargs)
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -33,10 +36,36 @@ android {
 }
 
 dependencies {
-
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
+    implementation libs.constraintlayout
+    implementation(libs.kotlinx.metadata.jvm)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Room Database
+    implementation libs.room.runtime
+    implementation libs.androidx.activity
+    kapt libs.room.compiler
+    implementation libs.room.ktx
+
+    // Lifecycle (ViewModel, LiveData, Coroutine Scopes)
+    implementation libs.lifecycle.viewmodel.ktx
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.lifecycle.livedata.ktx
+
+    // Kotlin Coroutines
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
+
+    // Navigation Component
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
+
+    // Tests
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.androidx.espresso.core
