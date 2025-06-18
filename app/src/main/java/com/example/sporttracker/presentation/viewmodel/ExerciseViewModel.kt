@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.sporttracker.data.model.Exercise
 import com.example.sporttracker.data.repository.ExerciseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -37,4 +38,7 @@ class ExerciseViewModel @Inject constructor(
             repository.deleteExercise(exercise)
         }
     }
+
+    fun getExerciseById(id: Int): Flow<Exercise?> =
+        repository.getExerciseById(id)
 }

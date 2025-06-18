@@ -10,6 +10,9 @@ class ExerciseRepository @Inject constructor(
 ) {
     fun getAllExercises(): Flow<List<Exercise>> = exerciseDao.getAllExercises()
 
+    fun getExerciseById(id: Int): Flow<Exercise?> =
+        exerciseDao.getExerciseById(id)
+
     suspend fun insertExercise(exercise: Exercise) = exerciseDao.insertExercise(exercise)
 
     suspend fun updateExercise(exercise: Exercise) = exerciseDao.updateExercise(exercise)
