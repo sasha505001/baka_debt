@@ -2,6 +2,7 @@ package com.example.sporttracker
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -48,8 +49,15 @@ class ExerciseListFragment : Fragment() {
                 // TODO: переход к экрану редактирования
             },
             onDelete = { exercise ->
-                Toast.makeText(requireContext(), "Удалить: ${exercise.name}", Toast.LENGTH_SHORT).show()
-                // TODO: показать диалог подтверждения и удалить через ViewModel
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Удалить упражнение?")
+                    .setMessage("Вы уверены, что хотите удалить '${exercise.name}'?")
+                    .setPositiveButton("Удалить") { _, _ ->
+                        viewModel.delete(exercise)
+                        Toast.makeText(requireContext(), "Удалено: ${exercise.name}", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
             }
         )
         binding.recyclerViewExercises.layoutManager = LinearLayoutManager(requireContext())
