@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sporttracker.data.model.Exercise
 import com.example.sporttracker.databinding.ItemExerciseBinding
 
-class ExerciseAdapter : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(DiffCallback) {
+class ExerciseAdapter(
+    private val onItemClick: (Exercise) -> Unit
+) : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder>(DiffCallback) {
 
     object DiffCallback : DiffUtil.ItemCallback<Exercise>() {
         override fun areItemsTheSame(oldItem: Exercise, newItem: Exercise): Boolean =
@@ -26,15 +28,19 @@ class ExerciseAdapter : ListAdapter<Exercise, ExerciseAdapter.ExerciseViewHolder
     }
 
     override fun onBindViewHolder(holder: ExerciseViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), onItemClick)
     }
 
     class ExerciseViewHolder(private val binding: ItemExerciseBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: Exercise) = with(binding) {
+        fun bind(item: Exercise, onItemClick: (Exercise) -> Unit) = with(binding) {
             textExerciseName.text = item.name
             textExerciseDescription.text = item.description ?: "Описание отсутствует"
+
+            root.setOnClickListener {
+                onItemClick(item)
+            }
         }
     }
 }
