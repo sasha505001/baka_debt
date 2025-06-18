@@ -23,4 +23,9 @@
         android:id="@+id/foodSupplementsFragment"
         android:name="com.example.sporttracker.FoodSupplementsFragment"
         android:label="Пищевые добавки" />
+
+    <fragment
+        android:id="@+id/addExerciseFragment"
+        android:name="com.example.sporttracker.presentation.fragment.AddExerciseFragment"
+        android:label="Добавить упражнение" />
 </navigation>

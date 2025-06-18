@@ -6,9 +6,18 @@
     android:layout_height="match_parent"
     android:gravity="center">
 
-<androidx.recyclerview.widget.RecyclerView
-android:id="@+id/recyclerViewExercises"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:listitem="@layout/item_exercise" />
-    </FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+    android:id="@+id/recyclerViewExercises"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:listitem="@layout/item_exercise" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddExercise"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Добавить"
+        android:src="@android:drawable/ic_input_add" />
+</FrameLayout>

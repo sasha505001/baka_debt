@@ -13,7 +13,9 @@ import com.example.sporttracker.presentation.viewmodel.ExerciseViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
 import com.example.sporttracker.data.adapter.ExerciseAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 
 @AndroidEntryPoint
 class ExerciseListFragment : Fragment() {
@@ -38,12 +40,16 @@ class ExerciseListFragment : Fragment() {
         adapter = ExerciseAdapter { exercise ->
             Toast.makeText(requireContext(), "Вы выбрали: ${exercise.name}", Toast.LENGTH_SHORT).show()
         }
+        binding.recyclerViewExercises.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewExercises.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.exercises.collectLatest { list ->
                 adapter.submitList(list)
             }
+        }
+        binding.fabAddExercise.setOnClickListener {
+            findNavController().navigate(R.id.addExerciseFragment)
         }
     }
 
