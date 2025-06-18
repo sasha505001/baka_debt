@@ -38,7 +38,9 @@ class ExerciseListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter = ExerciseAdapter { exercise ->
-            Toast.makeText(requireContext(), "Вы выбрали: ${exercise.name}", Toast.LENGTH_SHORT).show()
+            val action = ExerciseListFragmentDirections
+                .actionExerciseListFragmentToExerciseDetailFragment(exercise.id)
+            findNavController().navigate(action)
         }
         binding.recyclerViewExercises.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewExercises.adapter = adapter

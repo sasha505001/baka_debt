@@ -51,7 +51,9 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
+    // Glide(Для изображений
+    implementation(libs.glide)
+    kapt(libs.glide.compiler)
     // Room Database
     implementation libs.room.runtime
     implementation libs.androidx.activity

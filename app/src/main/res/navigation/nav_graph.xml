@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/workoutRoutinesFragment">
 
@@ -12,7 +13,11 @@
     <fragment
         android:id="@+id/exerciseListFragment"
         android:name="com.example.sporttracker.ExerciseListFragment"
-        android:label="Упражнения" />
+        android:label="Упражнения">
+    <action
+        android:id="@+id/action_exerciseListFragment_to_exerciseDetailFragment"
+        app:destination="@id/exerciseDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/trainingHistoryFragment"
@@ -28,4 +33,13 @@
         android:id="@+id/addExerciseFragment"
         android:name="com.example.sporttracker.presentation.fragment.AddExerciseFragment"
         android:label="Добавить упражнение" />
+
+    <fragment
+        android:id="@+id/exerciseDetailFragment"
+        android:name="com.example.sporttracker.presentation.fragment.ExerciseDetailFragment"
+        tools:layout="@layout/fragment_exercise_detail">
+        <argument
+            android:name="exerciseId"
+            app:argType="integer" />
+    </fragment>
 </navigation>
