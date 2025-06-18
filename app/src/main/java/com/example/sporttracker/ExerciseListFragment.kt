@@ -45,8 +45,9 @@ class ExerciseListFragment : Fragment() {
                 findNavController().navigate(action)
             },
             onEdit = { exercise ->
-                Toast.makeText(requireContext(), "Редактировать: ${exercise.name}", Toast.LENGTH_SHORT).show()
-                // TODO: переход к экрану редактирования
+                val action = ExerciseListFragmentDirections
+                    .actionExerciseListFragmentToAddExerciseFragment(exercise.id)
+                findNavController().navigate(action)
             },
             onDelete = { exercise ->
                 AlertDialog.Builder(requireContext())

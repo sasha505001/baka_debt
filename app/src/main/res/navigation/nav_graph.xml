@@ -17,6 +17,9 @@
     <action
         android:id="@+id/action_exerciseListFragment_to_exerciseDetailFragment"
         app:destination="@id/exerciseDetailFragment" />
+    <action
+        android:id="@+id/action_exerciseListFragment_to_addExerciseFragment"
+        app:destination="@id/addExerciseFragment" />
     </fragment>
 
     <fragment
@@ -32,7 +35,12 @@
     <fragment
         android:id="@+id/addExerciseFragment"
         android:name="com.example.sporttracker.presentation.fragment.AddExerciseFragment"
-        android:label="Добавить упражнение" />
+        tools:layout="@layout/fragment_add_exercise">
+        <argument
+            android:name="exerciseId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 
     <fragment
         android:id="@+id/exerciseDetailFragment"
