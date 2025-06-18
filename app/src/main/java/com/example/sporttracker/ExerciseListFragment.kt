@@ -37,11 +37,21 @@ class ExerciseListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = ExerciseAdapter { exercise ->
-            val action = ExerciseListFragmentDirections
-                .actionExerciseListFragmentToExerciseDetailFragment(exercise.id)
-            findNavController().navigate(action)
-        }
+        adapter = ExerciseAdapter (
+            onItemClick = { exercise ->
+                val action = ExerciseListFragmentDirections
+                    .actionExerciseListFragmentToExerciseDetailFragment(exercise.id)
+                findNavController().navigate(action)
+            },
+            onEdit = { exercise ->
+                Toast.makeText(requireContext(), "Редактировать: ${exercise.name}", Toast.LENGTH_SHORT).show()
+                // TODO: переход к экрану редактирования
+            },
+            onDelete = { exercise ->
+                Toast.makeText(requireContext(), "Удалить: ${exercise.name}", Toast.LENGTH_SHORT).show()
+                // TODO: показать диалог подтверждения и удалить через ViewModel
+            }
+        )
         binding.recyclerViewExercises.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewExercises.adapter = adapter
 

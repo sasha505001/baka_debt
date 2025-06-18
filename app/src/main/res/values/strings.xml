@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">sporttracker</string>
+    <string name="exercise_options">меню у упражнений</string>
 </resources>
