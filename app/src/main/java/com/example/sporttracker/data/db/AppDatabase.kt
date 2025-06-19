@@ -12,7 +12,7 @@ import com.example.sporttracker.data.db.dao.SupplementDao
         Exercise::class,
         Supplement::class
                ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

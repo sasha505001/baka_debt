@@ -1,4 +1,4 @@
-package com.example.sporttracker
+package com.example.sporttracker.presentation.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,8 +15,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.navigation.fragment.findNavController
-import com.example.sporttracker.data.adapter.ExerciseAdapter
+import com.example.sporttracker.presentation.adapter.ExerciseAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sporttracker.R
 
 @AndroidEntryPoint
 class ExerciseListFragment : Fragment() {

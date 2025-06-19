@@ -1,4 +1,4 @@
-package com.example.sporttracker.data.adapter
+package com.example.sporttracker.presentation.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

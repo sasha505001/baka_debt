@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.workoutRoutinesFragment,
                 R.id.exerciseListFragment,
                 R.id.trainingHistoryFragment,
-                R.id.foodSupplementsFragment
+                R.id.supplementListFragment
             ),
             binding.drawerLayout
         )

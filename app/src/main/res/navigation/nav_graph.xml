@@ -12,7 +12,7 @@
 
     <fragment
         android:id="@+id/exerciseListFragment"
-        android:name="com.example.sporttracker.ExerciseListFragment"
+        android:name="com.example.sporttracker.presentation.fragment.ExerciseListFragment"
         android:label="Упражнения">
     <action
         android:id="@+id/action_exerciseListFragment_to_exerciseDetailFragment"
@@ -28,9 +28,10 @@
         android:label="История тренировок" />
 
     <fragment
-        android:id="@+id/foodSupplementsFragment"
-        android:name="com.example.sporttracker.FoodSupplementsFragment"
-        android:label="Пищевые добавки" />
+        android:id="@+id/supplementListFragment"
+        android:name="com.example.sporttracker.presentation.fragment.SupplementListFragment"
+        android:label="Пищевые добавки"
+        tools:layout="@layout/fragment_supplement_list" />
 
     <fragment
         android:id="@+id/addExerciseFragment"
