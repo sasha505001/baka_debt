@@ -17,29 +17,11 @@
             android:inputType="text"
             android:minHeight="48dp" />
 
-        <EditText
-            android:id="@+id/editDosage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Дозировка (напр. 2 капсулы)"
-            android:inputType="text"
-            android:minHeight="48dp" />
-
-        <EditText
-            android:id="@+id/editTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Время (напр. 08:00)"
-            android:focusable="false"
-            android:clickable="true"
-            android:minHeight="48dp" />
-
         <Spinner
             android:id="@+id/spinnerScheduleType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="48dp" />
-
         <EditText
             android:id="@+id/editIntervalDays"
             android:layout_width="match_parent"
@@ -57,6 +39,93 @@
             android:inputType="text"
             android:visibility="gone"
             android:minHeight="48dp" />
+
+        <LinearLayout
+            android:id="@+id/containerIntervalHours"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Интервал (в часах)" />
+
+            <EditText
+                android:id="@+id/editIntervalHours"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Например, 8"
+                android:inputType="number"
+                android:minHeight="48dp" />
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:id="@+id/containerSpecificDates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/textSpecificDatesLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Конкретные даты приёма"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textSpecificDatesSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Не выбраны"
+                android:textColor="@android:color/darker_gray"
+                android:paddingTop="4dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/containerFixedSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/textScheduleHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Приёмы на день"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/textScheduleSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Не задано"
+                android:textColor="@android:color/darker_gray"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+            <LinearLayout
+                android:id="@+id/doseListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+
+
 
         <EditText
             android:id="@+id/editNotes"

@@ -49,6 +49,18 @@
             android:name="supplementId"
             app:argType="integer"
             android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_addSupplementFragment_to_supplementScheduleEditorFragment"
+            app:destination="@id/supplementScheduleEditorFragment" />
+        <action
+            android:id="@+id/action_addSupplementFragment_to_specificDatesEditorFragment"
+            app:destination="@id/specificDatesEditorFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/supplementScheduleEditorFragment"
+        android:name="com.example.sporttracker.presentation.fragment.SupplementScheduleEditorFragment"
+        android:label="Редактирование расписания"
+        tools:layout="@layout/fragment_supplement_schedule_editor">
     </fragment>
 
     <fragment
@@ -79,6 +91,12 @@
         <argument
             android:name="supplementId"
             app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/specificDatesEditorFragment"
+        android:name="com.example.sporttracker.presentation.fragment.SpecificDatesEditorFragment"
+        android:label="Редактор дат"
+        tools:layout="@layout/fragment_specific_dates_editor">
     </fragment>
 
 </navigation>

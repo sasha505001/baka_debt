@@ -12,6 +12,7 @@ import com.example.sporttracker.presentation.viewmodel.SupplementViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 @AndroidEntryPoint
 class SupplementDetailFragment : Fragment() {
@@ -36,8 +37,26 @@ class SupplementDetailFragment : Fragment() {
             viewModel.getSupplementById(supplementId).collectLatest { supplement ->
                 supplement?.let {
                     binding.textName.text = it.name
-                    binding.textDosage.text = it.dosage
-                    binding.textTime.text = "Время: ${it.time}"
+                    val scheduleMap = it.scheduleMapJson?.let { json ->
+                        runCatching { org.json.JSONObject(json) }.getOrNull()
+                    } ?: org.json.JSONObject()
+
+                    if (it.scheduleType == SupplementScheduleType.INTERVAL_HOURS) {
+                        binding.textDosage.text = ""
+                        binding.textTime.text = "Каждые ${it.intervalHours} ч"
+                    } else {
+                        val scheduleMap = it.scheduleMapJson?.let { json ->
+                            runCatching { JSONObject(json) }.getOrNull()
+                        } ?: JSONObject()
+
+                        val summary = scheduleMap.keys().asSequence()
+                            .joinToString("\n") { time -> "$time — ${scheduleMap.optString(time)}" }
+
+                        binding.textDosage.text = summary
+                        binding.textTime.text = ""
+                    }
+
+
 
                     binding.textSchedule.text = when (it.scheduleType) {
                         SupplementScheduleType.EVERY_DAY -> "Каждый день"
@@ -48,6 +67,9 @@ class SupplementDetailFragment : Fragment() {
                             val days = it.weekdays.orEmpty().split(",").mapNotNull { d -> d.toIntOrNull() }
                                 .map { d -> weekdayName(d) }
                             "По дням: ${days.joinToString(", ")}"
+                        }
+                        SupplementScheduleType.INTERVAL_HOURS -> {
+                            "Каждые ${it.intervalHours} ч"
                         }
                     }
 

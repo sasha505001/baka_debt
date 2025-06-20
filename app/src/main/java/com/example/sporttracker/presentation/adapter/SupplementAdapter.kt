@@ -11,6 +11,7 @@ import com.example.sporttracker.data.model.SupplementScheduleType
 import android.widget.PopupMenu
 import androidx.appcompat.app.AlertDialog
 import com.example.sporttracker.R
+import org.json.JSONObject
 
 class SupplementAdapter(
     private val onDetailClick: (Int) -> Unit,
@@ -46,8 +47,17 @@ class SupplementAdapter(
 
         fun bind(supplement: Supplement) = with(binding) {
             textSupplementName.text = supplement.name
-            textSupplementDosage.text = supplement.dosage
-            textSupplementTime.text = "В ${supplement.time}"
+            val scheduleMap = supplement.scheduleMapJson?.let { json ->
+                runCatching { org.json.JSONObject(json) }.getOrNull()
+            } ?: org.json.JSONObject()
+
+            val scheduleSummary = scheduleMap.keys().asSequence().joinToString("\n") { time ->
+                val dose = scheduleMap.optString(time)
+                "$time — $dose"
+            }
+
+            textSupplementDosage.text = scheduleSummary
+            textSupplementTime.text = ""
 
             textSupplementSchedule.text = when (supplement.scheduleType) {
                 SupplementScheduleType.EVERY_DAY -> "Каждый день"
@@ -60,6 +70,7 @@ class SupplementAdapter(
                         .map { weekdayName(it) }
                     "По дням: ${days.joinToString(", ")}"
                 }
+                SupplementScheduleType.INTERVAL_HOURS -> "Каждые ${supplement.intervalHours} ч"
             }
             itemView.setOnClickListener {
                 onDetailClick(supplement.id) // теперь открывает SupplementDetailFragment

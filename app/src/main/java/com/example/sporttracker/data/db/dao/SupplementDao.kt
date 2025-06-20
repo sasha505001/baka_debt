@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface SupplementDao {
 
-    @Query("SELECT * FROM supplements ORDER BY time ASC")
+    @Query("SELECT * FROM supplements")
     fun getAllSupplements(): Flow<List<Supplement>>
 
     @Query("SELECT * FROM supplements WHERE id = :id")
