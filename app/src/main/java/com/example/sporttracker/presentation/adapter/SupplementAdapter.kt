@@ -9,7 +9,9 @@ import com.example.sporttracker.data.model.Supplement
 import com.example.sporttracker.databinding.ItemSupplementBinding
 import com.example.sporttracker.data.model.SupplementScheduleType
 
-class SupplementAdapter : ListAdapter<Supplement, SupplementAdapter.SupplementViewHolder>(DiffCallback) {
+class SupplementAdapter(
+    private val onClick: (Int) -> Unit
+) : ListAdapter<Supplement, SupplementAdapter.SupplementViewHolder>(DiffCallback) {
 
     companion object DiffCallback : DiffUtil.ItemCallback<Supplement>() {
         override fun areItemsTheSame(oldItem: Supplement, newItem: Supplement): Boolean {
@@ -53,6 +55,9 @@ class SupplementAdapter : ListAdapter<Supplement, SupplementAdapter.SupplementVi
                         .map { weekdayName(it) }
                     "По дням: ${days.joinToString(", ")}"
                 }
+            }
+            itemView.setOnClickListener {
+                onClick(supplement.id)
             }
         }
 

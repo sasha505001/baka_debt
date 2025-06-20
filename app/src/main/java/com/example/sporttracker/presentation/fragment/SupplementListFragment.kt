@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.navigation.fragment.findNavController
 import com.example.sporttracker.R
+import com.example.sporttracker.presentation.fragment.SupplementListFragmentDirections
 
 @AndroidEntryPoint
 class SupplementListFragment : Fragment() {
@@ -35,7 +36,11 @@ class SupplementListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = SupplementAdapter()
+        adapter = SupplementAdapter { supplementId ->
+            val action = SupplementListFragmentDirections
+                .actionSupplementListFragmentToSupplementDetailFragment(supplementId)
+            findNavController().navigate(action)
+        }
         binding.recyclerSupplements.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerSupplements.adapter = adapter
 

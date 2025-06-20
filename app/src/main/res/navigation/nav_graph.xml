@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_supplementListFragment_to_addSupplementFragment"
             app:destination="@id/addSupplementFragment" />
+        <action
+            android:id="@+id/action_supplementListFragment_to_supplementDetailFragment"
+            app:destination="@id/supplementDetailFragment" />
     </fragment>
 
     <fragment
@@ -61,4 +64,16 @@
             android:name="exerciseId"
             app:argType="integer" />
     </fragment>
+
+    <fragment
+        android:id="@+id/supplementDetailFragment"
+        android:name="com.example.sporttracker.presentation.fragment.SupplementDetailFragment"
+        android:label="Просмотр добавки"
+        tools:layout="@layout/fragment_supplement_detail">
+
+        <argument
+            android:name="supplementId"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>
