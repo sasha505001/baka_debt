@@ -10,39 +10,55 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/textSupplementName"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Добавка"
-            android:textStyle="bold"
-            android:textSize="18sp" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textSupplementDosage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="1 капсула"
-            android:textSize="14sp"
-            android:paddingTop="4dp" />
+            <TextView
+                android:id="@+id/textSupplementName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Добавка"
+                android:textStyle="bold"
+                android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/textSupplementTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="В 08:00"
-            android:textSize="14sp"
-            android:paddingTop="2dp" />
+            <TextView
+                android:id="@+id/textSupplementDosage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1 капсула"
+                android:textSize="14sp"
+                android:paddingTop="4dp" />
 
-        <TextView
-            android:id="@+id/textSupplementSchedule"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Каждый день"
-            android:textSize="14sp"
-            android:paddingTop="2dp" />
+            <TextView
+                android:id="@+id/textSupplementTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="В 08:00"
+                android:textSize="14sp"
+                android:paddingTop="2dp" />
+
+            <TextView
+                android:id="@+id/textSupplementSchedule"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Каждый день"
+                android:textSize="14sp"
+                android:paddingTop="2dp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/buttonMore"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_more_vert"
+            android:contentDescription="Меню"
+            android:paddingStart="12dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

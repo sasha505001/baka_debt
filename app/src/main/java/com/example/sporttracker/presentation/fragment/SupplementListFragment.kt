@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import androidx.navigation.fragment.findNavController
 import com.example.sporttracker.R
 import com.example.sporttracker.presentation.fragment.SupplementListFragmentDirections
+import androidx.core.os.bundleOf
 
 @AndroidEntryPoint
 class SupplementListFragment : Fragment() {
@@ -36,11 +37,21 @@ class SupplementListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = SupplementAdapter { supplementId ->
-            val action = SupplementListFragmentDirections
-                .actionSupplementListFragmentToSupplementDetailFragment(supplementId)
-            findNavController().navigate(action)
-        }
+        val adapter = SupplementAdapter(
+            onDetailClick = { supplementId ->
+                val action = SupplementListFragmentDirections
+                    .actionSupplementListFragmentToSupplementDetailFragment(supplementId)
+                findNavController().navigate(action)
+            },
+            onEditClick = { supplementId ->
+                val action = SupplementListFragmentDirections
+                    .actionSupplementListFragmentToAddSupplementFragment(supplementId)
+                findNavController().navigate(action)
+            },
+            onDelete = { supplement ->
+                viewModel.delete(supplement)
+            }
+        )
         binding.recyclerSupplements.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerSupplements.adapter = adapter
 

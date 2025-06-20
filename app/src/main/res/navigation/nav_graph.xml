@@ -44,7 +44,12 @@
         android:id="@+id/addSupplementFragment"
         android:name="com.example.sporttracker.presentation.fragment.AddSupplementFragment"
         android:label="Добавить добавку"
-        tools:layout="@layout/fragment_add_supplement" />
+        tools:layout="@layout/fragment_add_supplement">
+        <argument
+            android:name="supplementId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 
     <fragment
         android:id="@+id/addExerciseFragment"

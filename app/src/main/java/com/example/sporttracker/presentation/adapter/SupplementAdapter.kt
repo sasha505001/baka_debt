@@ -8,9 +8,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sporttracker.data.model.Supplement
 import com.example.sporttracker.databinding.ItemSupplementBinding
 import com.example.sporttracker.data.model.SupplementScheduleType
+import android.widget.PopupMenu
+import androidx.appcompat.app.AlertDialog
+import com.example.sporttracker.R
 
 class SupplementAdapter(
-    private val onClick: (Int) -> Unit
+    private val onDetailClick: (Int) -> Unit,
+    private val onEditClick: (Int) -> Unit,
+    private val onDelete: ((Supplement) -> Unit)? = null
 ) : ListAdapter<Supplement, SupplementAdapter.SupplementViewHolder>(DiffCallback) {
 
     companion object DiffCallback : DiffUtil.ItemCallback<Supplement>() {
@@ -57,7 +62,32 @@ class SupplementAdapter(
                 }
             }
             itemView.setOnClickListener {
-                onClick(supplement.id)
+                onDetailClick(supplement.id) // теперь открывает SupplementDetailFragment
+            }
+            buttonMore.setOnClickListener {
+                val popup = PopupMenu(it.context, it)
+                popup.menuInflater.inflate(R.menu.supplement_item_menu, popup.menu)
+                popup.setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.menu_edit -> {
+                            onEditClick(supplement.id) // теперь редактирование
+                            true
+                        }
+                        R.id.menu_delete -> {
+                            AlertDialog.Builder(it.context)
+                                .setTitle("Удалить добавку?")
+                                .setMessage("Вы уверены, что хотите удалить добавку?")
+                                .setPositiveButton("Да") { _, _ ->
+                                    onDelete?.invoke(supplement)
+                                }
+                                .setNegativeButton("Отмена", null)
+                                .show()
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
 

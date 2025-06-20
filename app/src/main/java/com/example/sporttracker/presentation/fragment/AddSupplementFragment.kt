@@ -14,6 +14,9 @@ import com.example.sporttracker.databinding.FragmentAddSupplementBinding
 import com.example.sporttracker.presentation.viewmodel.SupplementViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
 class AddSupplementFragment : Fragment() {
@@ -37,6 +40,30 @@ class AddSupplementFragment : Fragment() {
         setupScheduleSpinner()
         setupTimePicker()
         setupSaveButton()
+        val supplementId = arguments?.getInt("supplementId", -1) ?: -1
+        if (supplementId != -1) {
+            viewModel.getSupplementById(supplementId).onEach { supplement ->
+                if (supplement != null) {
+                    fillFields(supplement)
+                    binding.buttonSave.setOnClickListener {
+                        val updated = supplement.copy(
+                            name = binding.editName.text.toString().trim(),
+                            dosage = binding.editDosage.text.toString().trim(),
+                            time = selectedTime,
+                            scheduleType = selectedScheduleType,
+                            intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
+                                binding.editIntervalDays.text.toString().toIntOrNull() else null,
+                            weekdays = if (selectedScheduleType == SupplementScheduleType.SPECIFIC_WEEKDAYS)
+                                binding.editWeekdays.text.toString().takeIf { it.isNotBlank() } else null,
+                            notes = binding.editNotes.text.toString().trim()
+                        )
+                        viewModel.update(updated)
+                        Toast.makeText(requireContext(), "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+        }
     }
 
     private fun setupTimePicker() {
@@ -123,6 +150,17 @@ class AddSupplementFragment : Fragment() {
             Toast.makeText(requireContext(), "Добавка сохранена", Toast.LENGTH_SHORT).show()
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
+    }
+
+    private fun fillFields(s: Supplement) = with(binding) {
+        editName.setText(s.name)
+        editDosage.setText(s.dosage)
+        editTime.setText(s.time)
+        selectedTime = s.time
+        spinnerScheduleType.setSelection(s.scheduleType.ordinal)
+        editIntervalDays.setText(s.intervalDays?.toString() ?: "")
+        editWeekdays.setText(s.weekdays ?: "")
+        editNotes.setText(s.notes ?: "")
     }
 
     override fun onDestroyView() {
