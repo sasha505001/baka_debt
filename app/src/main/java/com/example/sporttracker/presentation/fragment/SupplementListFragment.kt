@@ -14,6 +14,8 @@ import com.example.sporttracker.presentation.viewmodel.SupplementViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
+import com.example.sporttracker.R
 
 @AndroidEntryPoint
 class SupplementListFragment : Fragment() {
@@ -37,6 +39,9 @@ class SupplementListFragment : Fragment() {
         binding.recyclerSupplements.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerSupplements.adapter = adapter
 
+        binding.fabAddSupplement.setOnClickListener {
+            findNavController().navigate(R.id.action_supplementListFragment_to_addSupplementFragment)
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.supplements.collectLatest { list ->
                 adapter.submitList(list)

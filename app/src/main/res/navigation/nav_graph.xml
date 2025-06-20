@@ -31,7 +31,17 @@
         android:id="@+id/supplementListFragment"
         android:name="com.example.sporttracker.presentation.fragment.SupplementListFragment"
         android:label="Пищевые добавки"
-        tools:layout="@layout/fragment_supplement_list" />
+        tools:layout="@layout/fragment_supplement_list">
+        <action
+            android:id="@+id/action_supplementListFragment_to_addSupplementFragment"
+            app:destination="@id/addSupplementFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addSupplementFragment"
+        android:name="com.example.sporttracker.presentation.fragment.AddSupplementFragment"
+        android:label="Добавить добавку"
+        tools:layout="@layout/fragment_add_supplement" />
 
     <fragment
         android:id="@+id/addExerciseFragment"
