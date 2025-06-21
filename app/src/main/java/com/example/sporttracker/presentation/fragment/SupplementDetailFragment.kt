@@ -12,6 +12,7 @@ import com.example.sporttracker.presentation.viewmodel.SupplementViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import org.json.JSONObject
 
 @AndroidEntryPoint
@@ -34,54 +35,62 @@ class SupplementDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val supplementId = args.supplementId
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.getSupplementById(supplementId).collectLatest { supplement ->
-                supplement?.let {
+            viewModel.getSupplementById(supplementId).collectLatest { s ->
+                s?.let {
                     binding.textName.text = it.name
-                    val scheduleMap = it.scheduleMapJson?.let { json ->
-                        runCatching { org.json.JSONObject(json) }.getOrNull()
-                    } ?: org.json.JSONObject()
+                    binding.textNotes.text = it.notes?.takeIf { n -> n.isNotBlank() } ?: "Без заметок"
 
-                    if (it.scheduleType == SupplementScheduleType.INTERVAL_HOURS) {
-                        binding.textDosage.text = ""
-                        binding.textTime.text = "Каждые ${it.intervalHours} ч"
-                    } else {
-                        val scheduleMap = it.scheduleMapJson?.let { json ->
-                            runCatching { JSONObject(json) }.getOrNull()
-                        } ?: JSONObject()
-
-                        val summary = scheduleMap.keys().asSequence()
-                            .joinToString("\n") { time -> "$time — ${scheduleMap.optString(time)}" }
-
-                        binding.textDosage.text = summary
-                        binding.textTime.text = ""
-                    }
-
-
-
-                    binding.textSchedule.text = when (it.scheduleType) {
+                    // --- расписание ---
+                    val scheduleText = when (it.scheduleType) {
                         SupplementScheduleType.EVERY_DAY -> "Каждый день"
-                        SupplementScheduleType.EVERY_N_DAYS -> "Каждые ${it.intervalDays} дней"
-                        SupplementScheduleType.WEEKDAYS_ONLY -> "Будние дни"
-                        SupplementScheduleType.WEEKENDS_ONLY -> "Выходные"
+
+                        SupplementScheduleType.EVERY_N_DAYS -> {
+                            val start = it.startDate ?: "?"
+                            val days = it.intervalDays ?: "?"
+                            "С $start, каждые $days дн."
+                        }
+
+                        SupplementScheduleType.INTERVAL_HOURS -> {
+                            val baseTime = it.scheduleMapJson?.let { json ->
+                                runCatching { JSONObject(json) }.getOrNull()
+                                    ?.keys()?.asSequence()?.firstOrNull()
+                            } ?: "время не указано"
+                            val hours = it.intervalHours ?: "?"
+                            "$baseTime + каждые $hours ч"
+                        }
+
                         SupplementScheduleType.SPECIFIC_WEEKDAYS -> {
                             val days = it.weekdays.orEmpty().split(",").mapNotNull { d -> d.toIntOrNull() }
                                 .map { d -> weekdayName(d) }
                             "По дням: ${days.joinToString(", ")}"
                         }
-                        SupplementScheduleType.INTERVAL_HOURS -> {
-                            "Каждые ${it.intervalHours} ч"
+
+                        SupplementScheduleType.SPECIFIC_DATES -> {
+                            val array = runCatching { JSONArray(it.specificDates ?: "[]") }.getOrNull()
+                            if (array != null && array.length() > 0) {
+                                val preview = (0 until minOf(3, array.length()))
+                                    .joinToString(", ") { i -> array.getString(i) }
+                                "Даты: $preview" + if (array.length() > 3) " + ещё ${array.length() - 3}" else ""
+                            } else {
+                                "Даты не указаны"
+                            }
                         }
                     }
+                    binding.textSchedule.text = scheduleText
 
-                    binding.textNotes.text = if (it.notes.isNullOrBlank()) {
-                        "Без заметок"
-                    } else {
-                        "Заметки: ${it.notes}"
+                    // --- расписание: время — доза ---
+                    val scheduleMap = it.scheduleMapJson?.let { json ->
+                        runCatching { JSONObject(json) }.getOrNull()
                     }
+                    val summary = scheduleMap?.keys()?.asSequence()
+                        ?.joinToString("\n") { time -> "$time — ${scheduleMap.optString(time)}" }
+                    binding.textDosage.text = summary ?: "Нет данных"
+                    binding.textTime.text = ""
                 }
             }
         }
     }
+
 
     private fun weekdayName(day: Int): String {
         return when (day) {

@@ -11,6 +11,7 @@ import com.example.sporttracker.data.model.SupplementScheduleType
 import android.widget.PopupMenu
 import androidx.appcompat.app.AlertDialog
 import com.example.sporttracker.R
+import org.json.JSONArray
 import org.json.JSONObject
 
 class SupplementAdapter(
@@ -61,16 +62,37 @@ class SupplementAdapter(
 
             textSupplementSchedule.text = when (supplement.scheduleType) {
                 SupplementScheduleType.EVERY_DAY -> "Каждый день"
-                SupplementScheduleType.EVERY_N_DAYS -> "Каждые ${supplement.intervalDays} дней"
-                SupplementScheduleType.WEEKDAYS_ONLY -> "По будням"
-                SupplementScheduleType.WEEKENDS_ONLY -> "По выходным"
+
+                SupplementScheduleType.EVERY_N_DAYS -> {
+                    val start = supplement.startDate ?: "?"
+                    val days = supplement.intervalDays ?: "?"
+                    "С $start, каждые $days дн."
+                }
+
+                SupplementScheduleType.INTERVAL_HOURS -> {
+                    val base = supplement.scheduleMapJson?.let {
+                        JSONObject(it).keys().asSequence().firstOrNull()
+                    } ?: "время не указано"
+                    val hours = supplement.intervalHours ?: "?"
+                    "$base + каждые $hours ч"
+                }
+
                 SupplementScheduleType.SPECIFIC_WEEKDAYS -> {
                     val days = supplement.weekdays.orEmpty().split(",")
                         .mapNotNull { it.toIntOrNull() }
                         .map { weekdayName(it) }
                     "По дням: ${days.joinToString(", ")}"
                 }
-                SupplementScheduleType.INTERVAL_HOURS -> "Каждые ${supplement.intervalHours} ч"
+
+                SupplementScheduleType.SPECIFIC_DATES -> {
+                    val dates = supplement.specificDates?.let {
+                        runCatching { JSONArray(it) }.getOrNull()
+                    }
+                    if (dates != null && dates.length() > 0)
+                        "Конкретные даты: ${dates.length()} шт."
+                    else
+                        "Конкретные даты: —"
+                }
             }
             itemView.setOnClickListener {
                 onDetailClick(supplement.id) // теперь открывает SupplementDetailFragment

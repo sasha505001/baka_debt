@@ -31,14 +31,32 @@
             android:visibility="gone"
             android:minHeight="48dp" />
 
-        <EditText
-            android:id="@+id/editWeekdays"
+        <LinearLayout
+            android:id="@+id/containerWeekdays"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Дни недели (например 1,3,5)"
-            android:inputType="text"
-            android:visibility="gone"
-            android:minHeight="48dp" />
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/textWeekdaysLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Дни недели приёма"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textWeekdaysSelected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Не выбрано"
+                android:textColor="@android:color/darker_gray"
+                android:paddingTop="4dp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/containerIntervalHours"

@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResultListener
 import org.json.JSONArray
+import androidx.appcompat.app.AlertDialog
 
 @AndroidEntryPoint
 class AddSupplementFragment : Fragment() {
@@ -32,6 +33,9 @@ class AddSupplementFragment : Fragment() {
     private val viewModel: SupplementViewModel by viewModels()
     private val doseMap = mutableMapOf<String, String>()
     private var selectedScheduleType: SupplementScheduleType = SupplementScheduleType.EVERY_DAY
+    private val weekdayOptions = arrayOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+    private val selectedWeekdays = mutableSetOf<Int>()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -49,6 +53,24 @@ class AddSupplementFragment : Fragment() {
                 specificDates.add(jsonArray.getString(i))
             }
             updateSpecificDatesSummary()
+        }
+        binding.containerWeekdays.setOnClickListener {
+            val initialSelection = selectedWeekdays.toMutableSet()
+            val checked = BooleanArray(7) { i -> initialSelection.contains(i + 1) }
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Выберите дни недели")
+                .setMultiChoiceItems(weekdayOptions, checked) { _, which, isChecked ->
+                    if (isChecked) initialSelection.add(which + 1)
+                    else initialSelection.remove(which + 1)
+                }
+                .setPositiveButton("OK") { _, _ ->
+                    selectedWeekdays.clear()
+                    selectedWeekdays.addAll(initialSelection)
+                    updateWeekdaysText()
+                }
+                .setNegativeButton("Отмена", null)
+                .show()
         }
         binding.containerSpecificDates.setOnClickListener {
             val json = JSONArray(specificDates).toString()
@@ -74,6 +96,7 @@ class AddSupplementFragment : Fragment() {
                 if (supplement != null) {
                     fillFields(supplement)
                     binding.buttonSave.setOnClickListener {
+                        if (!validateRecord()) return@setOnClickListener
                         val updated = supplement.copy(
                             name = binding.editName.text.toString().trim(),
                             scheduleType = selectedScheduleType,
@@ -83,8 +106,8 @@ class AddSupplementFragment : Fragment() {
                                 binding.editIntervalHours.text.toString().toIntOrNull() else null,
                             intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
                                 binding.editIntervalDays.text.toString().toIntOrNull() else null,
-                            weekdays = if (selectedScheduleType == SupplementScheduleType.SPECIFIC_WEEKDAYS)
-                                binding.editWeekdays.text.toString().takeIf { it.isNotBlank() } else null,
+                            weekdays = if (selectedWeekdays.isNotEmpty())
+                                selectedWeekdays.sorted().joinToString(",") else null,
                             notes = binding.editNotes.text.toString().trim()
                         )
                         viewModel.update(updated)
@@ -108,7 +131,15 @@ class AddSupplementFragment : Fragment() {
 
     }
 
-
+    private fun updateWeekdaysText() {
+        val text = if (selectedWeekdays.isEmpty()) {
+            "Не выбрано"
+        } else {
+            selectedWeekdays.sorted()
+                .joinToString(", ") { weekdayName(it) }
+        }
+        binding.textWeekdaysSelected.text = text
+    }
 
     private fun setupScheduleSpinner() {
         val types = SupplementScheduleType.values()
@@ -116,10 +147,9 @@ class AddSupplementFragment : Fragment() {
             when (it) {
                 SupplementScheduleType.EVERY_DAY -> "Каждый день"
                 SupplementScheduleType.EVERY_N_DAYS -> "Каждые N дней"
-                SupplementScheduleType.WEEKDAYS_ONLY -> "Будние дни"
-                SupplementScheduleType.WEEKENDS_ONLY -> "Выходные"
-                SupplementScheduleType.SPECIFIC_WEEKDAYS -> "По дням недели"
                 SupplementScheduleType.INTERVAL_HOURS -> "Через каждые N часов"
+                SupplementScheduleType.SPECIFIC_WEEKDAYS -> "По выбранным дням недели"
+                SupplementScheduleType.SPECIFIC_DATES -> "Конкретные даты"
             }
         }
 
@@ -149,20 +179,32 @@ class AddSupplementFragment : Fragment() {
     private fun updateFieldVisibility() = with(binding) {
         editIntervalDays.visibility =
             if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS) View.VISIBLE else View.GONE
-        editWeekdays.visibility =
+        containerWeekdays.visibility =
             if (selectedScheduleType == SupplementScheduleType.SPECIFIC_WEEKDAYS) View.VISIBLE else View.GONE
         containerIntervalHours.visibility =
             if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS) View.VISIBLE else View.GONE
         containerFixedSchedule.visibility = View.VISIBLE
+        containerSpecificDates.visibility =
+            if (selectedScheduleType == SupplementScheduleType.SPECIFIC_DATES) View.VISIBLE else View.GONE
 
+
+    }
+
+    private fun validateRecord(): Boolean {
+        val name = binding.editName.text.toString().trim()
+        if (name.isBlank()) {
+            Toast.makeText(requireContext(), "Введите название добавки", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 
     private fun setupSaveButton() {
         binding.buttonSave.setOnClickListener {
+            if (!validateRecord()) return@setOnClickListener
             val name = binding.editName.text.toString().trim()
             val notes = binding.editNotes.text.toString().trim()
             val intervalDays = binding.editIntervalDays.text.toString().toIntOrNull()
-            val weekdays = binding.editWeekdays.text.toString().takeIf { it.isNotBlank() }
 
             val supplement = Supplement(
                 name = name,
@@ -174,8 +216,8 @@ class AddSupplementFragment : Fragment() {
                     binding.editIntervalHours.text.toString().toIntOrNull() else null,
                 intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
                     intervalDays else null,
-                weekdays = if (selectedScheduleType == SupplementScheduleType.SPECIFIC_WEEKDAYS)
-                    weekdays else null,
+                weekdays = if (selectedWeekdays.isNotEmpty())
+                    selectedWeekdays.sorted().joinToString(",") else null,
                 specificDates = JSONArray(specificDates).toString(),
                 startDate = null // или передай нужную дату, если появится DatePicker
             )
@@ -221,9 +263,22 @@ class AddSupplementFragment : Fragment() {
         }
 
         if (s.scheduleType == SupplementScheduleType.SPECIFIC_WEEKDAYS) {
-            editWeekdays.setText(s.weekdays.orEmpty())
+            selectedWeekdays.clear()
+            s.weekdays?.split(",")?.mapNotNull { it.toIntOrNull() }?.let { selectedWeekdays.addAll(it) }
+            updateWeekdaysText()
+        }
+        if (s.scheduleType == SupplementScheduleType.SPECIFIC_DATES) {
+            specificDates.clear()
+            s.specificDates?.let {
+                val array = JSONArray(it)
+                for (i in 0 until array.length()) {
+                    specificDates.add(array.getString(i))
+                }
+            }
+            updateSpecificDatesSummary()
         }
     }
+
     private fun updateSpecificDatesSummary() {
         binding.textSpecificDatesSummary.text = if (specificDates.isEmpty()) {
             "Не выбраны"
@@ -231,6 +286,17 @@ class AddSupplementFragment : Fragment() {
             specificDates.joinToString("\n") { it }
         }
     }
+    private fun weekdayName(day: Int): String = when (day) {
+        1 -> "Пн"
+        2 -> "Вт"
+        3 -> "Ср"
+        4 -> "Чт"
+        5 -> "Пт"
+        6 -> "Сб"
+        7 -> "Вс"
+        else -> "?"
+    }
+
 
     override fun onResume() {
         super.onResume()

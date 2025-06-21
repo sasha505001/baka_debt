@@ -55,8 +55,8 @@
 
         <ImageView
             android:id="@+id/buttonMore"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/ic_more_vert"
             android:contentDescription="Меню"
             android:paddingStart="12dp" />
