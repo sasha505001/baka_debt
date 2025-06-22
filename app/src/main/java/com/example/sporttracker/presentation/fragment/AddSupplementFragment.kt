@@ -126,7 +126,14 @@ class AddSupplementFragment : Fragment() {
     }
     private fun saveSupplement(existing: Supplement?) {
         if (!validateRecord()) return
-
+        if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS && doseMap.size != 1) {
+            Toast.makeText(
+                requireContext(),
+                "Необходимо укажзать ровно только 1 принятие",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
         val name = binding.editName.text.toString().trim()
         val notes = binding.editNotes.text.toString().trim().ifEmpty { null }
         val scheduleJson = if (doseMap.isNotEmpty()) JSONObject(doseMap as Map<*, *>).toString() else null
