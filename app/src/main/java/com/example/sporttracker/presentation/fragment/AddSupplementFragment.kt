@@ -1,5 +1,6 @@
 package com.example.sporttracker.presentation.fragment
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
@@ -14,6 +15,7 @@ import com.example.sporttracker.presentation.viewmodel.SupplementViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import androidx.lifecycle.lifecycleScope
+import java.text.SimpleDateFormat
 import com.example.sporttracker.R
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -23,6 +25,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResultListener
 import org.json.JSONArray
 import androidx.appcompat.app.AlertDialog
+import java.time.LocalDate
 
 @AndroidEntryPoint
 class AddSupplementFragment : Fragment() {
@@ -35,6 +38,8 @@ class AddSupplementFragment : Fragment() {
     private var selectedScheduleType: SupplementScheduleType = SupplementScheduleType.EVERY_DAY
     private val weekdayOptions = arrayOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
     private val selectedWeekdays = mutableSetOf<Int>()
+    private var selectedStartDate: String? = null
+    private var savedScheduleJson: String? = null
 
 
     override fun onCreateView(
@@ -53,6 +58,9 @@ class AddSupplementFragment : Fragment() {
                 specificDates.add(jsonArray.getString(i))
             }
             updateSpecificDatesSummary()
+        }
+        binding.containerStartDate.setOnClickListener {
+            showStartDatePicker()
         }
         binding.containerWeekdays.setOnClickListener {
             val initialSelection = selectedWeekdays.toMutableSet()
@@ -82,15 +90,29 @@ class AddSupplementFragment : Fragment() {
         setupScheduleSpinner()
         setupSaveButton()
         binding.containerFixedSchedule.setOnClickListener {
+            if (doseMap.isEmpty()) {
+                val json = savedScheduleJson
+                if (!json.isNullOrEmpty()) {
+                    val obj = JSONObject(json)
+                    obj.keys().forEach { key -> doseMap[key] = obj.getString(key) }
+                }
+            }
             findNavController().navigate(
                 R.id.action_addSupplementFragment_to_supplementScheduleEditorFragment,
                 bundleOf(
                     "doseMapJson" to JSONObject(doseMap as Map<*, *>).toString(),
-                    "singleEntry" to (selectedScheduleType != SupplementScheduleType.SPECIFIC_WEEKDAYS)
+                    "singleEntry" to (selectedScheduleType != SupplementScheduleType.SPECIFIC_WEEKDAYS),
+                    "scheduleType" to selectedScheduleType.name // ⬅️ Добавить ЭТО
                 )
             )
         }
         val supplementId = arguments?.getInt("supplementId", -1) ?: -1
+        val restoredJson = arguments?.getString("doseMapJson")
+        if (!restoredJson.isNullOrBlank()) {
+            val parsed = JSONObject(restoredJson)
+            doseMap.clear()
+            parsed.keys().forEach { key -> doseMap[key] = parsed.getString(key) }
+        }
         if (supplementId != -1) {
             viewModel.getSupplementById(supplementId).onEach { supplement ->
                 if (supplement != null) {
@@ -100,7 +122,7 @@ class AddSupplementFragment : Fragment() {
                         val updated = supplement.copy(
                             name = binding.editName.text.toString().trim(),
                             scheduleType = selectedScheduleType,
-                            scheduleMapJson = if (selectedScheduleType != SupplementScheduleType.INTERVAL_HOURS)
+                            scheduleMapJson = if (doseMap.isNotEmpty())
                                 JSONObject(doseMap as Map<*, *>).toString() else null,
                             intervalHours = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
                                 binding.editIntervalHours.text.toString().toIntOrNull() else null,
@@ -186,6 +208,10 @@ class AddSupplementFragment : Fragment() {
         containerFixedSchedule.visibility = View.VISIBLE
         containerSpecificDates.visibility =
             if (selectedScheduleType == SupplementScheduleType.SPECIFIC_DATES) View.VISIBLE else View.GONE
+        containerStartDate.visibility =
+            if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS ||
+                selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
+                View.VISIBLE else View.GONE
 
 
     }
@@ -205,12 +231,11 @@ class AddSupplementFragment : Fragment() {
             val name = binding.editName.text.toString().trim()
             val notes = binding.editNotes.text.toString().trim()
             val intervalDays = binding.editIntervalDays.text.toString().toIntOrNull()
-
             val supplement = Supplement(
                 name = name,
                 notes = notes.ifEmpty { null },
                 scheduleType = selectedScheduleType,
-                scheduleMapJson = if (selectedScheduleType != SupplementScheduleType.INTERVAL_HOURS)
+                scheduleMapJson = if (doseMap.isNotEmpty())
                     JSONObject(doseMap as Map<*, *>).toString() else null,
                 intervalHours = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
                     binding.editIntervalHours.text.toString().toIntOrNull() else null,
@@ -219,7 +244,7 @@ class AddSupplementFragment : Fragment() {
                 weekdays = if (selectedWeekdays.isNotEmpty())
                     selectedWeekdays.sorted().joinToString(",") else null,
                 specificDates = JSONArray(specificDates).toString(),
-                startDate = null // или передай нужную дату, если появится DatePicker
+                startDate = selectedStartDate ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             )
 
             viewModel.insert(supplement)
@@ -240,22 +265,27 @@ class AddSupplementFragment : Fragment() {
     }
 
     private fun fillFields(s: Supplement) = with(binding) {
+        savedScheduleJson = s.scheduleMapJson
+        s.scheduleMapJson?.let {
+            val obj = JSONObject(it)
+            doseMap.clear()
+            obj.keys().forEach { key -> doseMap[key] = obj.getString(key) }
+            updateScheduleSummary()
+        }
         selectedScheduleType = s.scheduleType
         spinnerScheduleType.setSelection(SupplementScheduleType.values().indexOf(s.scheduleType))
         updateFieldVisibility()
 
+        selectedStartDate = s.startDate
+        binding.textStartDate.text = selectedStartDate ?: "Не выбрана"
+
         editName.setText(s.name)
         editNotes.setText(s.notes)
 
+
+
         if (s.scheduleType == SupplementScheduleType.INTERVAL_HOURS) {
             editIntervalHours.setText(s.intervalHours?.toString() ?: "")
-        } else {
-            s.scheduleMapJson?.let {
-                val map = JSONObject(it)
-                doseMap.clear()
-                map.keys().forEach { key -> doseMap[key] = map.getString(key) }
-                updateScheduleSummary()
-            }
         }
 
         if (s.scheduleType == SupplementScheduleType.EVERY_N_DAYS) {
@@ -277,8 +307,24 @@ class AddSupplementFragment : Fragment() {
             }
             updateSpecificDatesSummary()
         }
+        updateStartDateSummary()
     }
+    private fun showStartDatePicker() {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+        val dialog = DatePickerDialog(requireContext(), { _, y, m, d ->
+            val selectedCal = Calendar.getInstance()
+            selectedCal.set(y, m, d)
+            val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            selectedStartDate = format.format(selectedCal.time)
+            binding.textStartDate.text = selectedStartDate
+        }, year, month, day)
+
+        dialog.show()
+    }
     private fun updateSpecificDatesSummary() {
         binding.textSpecificDatesSummary.text = if (specificDates.isEmpty()) {
             "Не выбраны"
@@ -296,12 +342,15 @@ class AddSupplementFragment : Fragment() {
         7 -> "Вс"
         else -> "?"
     }
-
+    private fun updateStartDateSummary() {
+        binding.textStartDate.text = selectedStartDate ?: "Не выбрана"
+    }
 
     override fun onResume() {
         super.onResume()
         updateSpecificDatesSummary()
         updateScheduleSummary()
+        updateStartDateSummary()
     }
 
     override fun onDestroyView() {

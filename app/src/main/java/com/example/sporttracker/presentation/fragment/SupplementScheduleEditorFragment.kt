@@ -18,7 +18,7 @@ class SupplementScheduleEditorFragment : Fragment() {
 
     private var _binding: FragmentSupplementScheduleEditorBinding? = null
     private val binding get() = _binding!!
-
+    private var scheduleType: String? = null
     private val doseMap = linkedMapOf<String, String>()
     private lateinit var adapter: DoseAdapter
 
@@ -32,6 +32,17 @@ class SupplementScheduleEditorFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        scheduleType = arguments?.getString("scheduleType")
+
+        // сначала загружаем doseMap из аргументов
+        val doseJson = arguments?.getString("doseMapJson")
+        if (!doseJson.isNullOrBlank()) {
+            val obj = JSONObject(doseJson)
+            doseMap.clear()
+            obj.keys().forEach { key -> doseMap[key] = obj.getString(key) }
+        }
+
+        // теперь создаём и настраиваем адаптер
         adapter = DoseAdapter(
             doseMap.toList(),
             onEdit = { time -> showEditDialog(time) },
@@ -40,21 +51,22 @@ class SupplementScheduleEditorFragment : Fragment() {
                 updateList()
             }
         )
-
         binding.recyclerDoseList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerDoseList.adapter = adapter
 
+        // кнопка "добавить"
         binding.buttonAdd.setOnClickListener {
-            showAddDialog()
+            if (scheduleType == "INTERVAL_HOURS" && doseMap.size >= 1) {
+                AlertDialog.Builder(requireContext())
+                    .setMessage("Для интервала по часам можно задать только одну запись.")
+                    .setPositiveButton("ОК", null)
+                    .show()
+            } else {
+                showAddDialog()
+            }
         }
 
-        arguments?.getString("doseMapJson")?.let { json ->
-            val parsed = JSONObject(json)
-            parsed.keys().forEach { time ->
-                doseMap[time] = parsed.getString(time)
-            }
-            updateList()
-        }
+
     }
 
     private fun showAddDialog() {
