@@ -118,39 +118,62 @@ class AddSupplementFragment : Fragment() {
                 if (supplement != null) {
                     fillFields(supplement)
                     binding.buttonSave.setOnClickListener {
-                        if (!validateRecord()) return@setOnClickListener
-                        val updated = supplement.copy(
-                            name = binding.editName.text.toString().trim(),
-                            scheduleType = selectedScheduleType,
-                            scheduleMapJson = if (doseMap.isNotEmpty())
-                                JSONObject(doseMap as Map<*, *>).toString() else null,
-                            intervalHours = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
-                                binding.editIntervalHours.text.toString().toIntOrNull() else null,
-                            intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
-                                binding.editIntervalDays.text.toString().toIntOrNull() else null,
-                            weekdays = if (selectedWeekdays.isNotEmpty())
-                                selectedWeekdays.sorted().joinToString(",") else null,
-                            notes = binding.editNotes.text.toString().trim()
-                        )
-                        viewModel.update(updated)
-                        Toast.makeText(requireContext(), "Изменения сохранены", Toast.LENGTH_SHORT).show()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                        saveSupplement(supplement)
                     }
-
-
                 }
             }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
-        setFragmentResultListener("doseScheduleResult") { _, bundle ->
-            val json = bundle.getString("doseMapJson") ?: return@setFragmentResultListener
-            val parsed = JSONObject(json)
-            doseMap.clear()
-            parsed.keys().forEach { key ->
-                doseMap[key] = parsed.getString(key)
-            }
-            updateScheduleSummary()
+    }
+    private fun saveSupplement(existing: Supplement?) {
+        if (!validateRecord()) return
+
+        val name = binding.editName.text.toString().trim()
+        val notes = binding.editNotes.text.toString().trim().ifEmpty { null }
+        val scheduleJson = if (doseMap.isNotEmpty()) JSONObject(doseMap as Map<*, *>).toString() else null
+        val intervalHours = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
+            binding.editIntervalHours.text.toString().toIntOrNull() else null
+        val intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
+            binding.editIntervalDays.text.toString().toIntOrNull() else null
+        val weekdays = if (selectedWeekdays.isNotEmpty())
+            selectedWeekdays.sorted().joinToString(",") else null
+        val startDate = selectedStartDate ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val specificDatesJson = JSONArray(specificDates).toString()
+
+        val supplement = if (existing != null) {
+            existing.copy(
+                name = name,
+                notes = notes,
+                scheduleType = selectedScheduleType,
+                scheduleMapJson = scheduleJson,
+                intervalHours = intervalHours,
+                intervalDays = intervalDays,
+                weekdays = weekdays,
+                specificDates = specificDatesJson,
+                startDate = startDate
+            )
+        } else {
+            Supplement(
+                name = name,
+                notes = notes,
+                scheduleType = selectedScheduleType,
+                scheduleMapJson = scheduleJson,
+                intervalHours = intervalHours,
+                intervalDays = intervalDays,
+                weekdays = weekdays,
+                specificDates = specificDatesJson,
+                startDate = startDate
+            )
         }
 
+        if (existing != null) {
+            viewModel.update(supplement)
+            Toast.makeText(requireContext(), "Изменения сохранены", Toast.LENGTH_SHORT).show()
+        } else {
+            viewModel.insert(supplement)
+            Toast.makeText(requireContext(), "Добавка сохранена", Toast.LENGTH_SHORT).show()
+        }
+
+        requireActivity().onBackPressedDispatcher.onBackPressed()
     }
 
     private fun updateWeekdaysText() {
@@ -226,30 +249,9 @@ class AddSupplementFragment : Fragment() {
     }
 
     private fun setupSaveButton() {
-        binding.buttonSave.setOnClickListener {
-            if (!validateRecord()) return@setOnClickListener
-            val name = binding.editName.text.toString().trim()
-            val notes = binding.editNotes.text.toString().trim()
-            val intervalDays = binding.editIntervalDays.text.toString().toIntOrNull()
-            val supplement = Supplement(
-                name = name,
-                notes = notes.ifEmpty { null },
-                scheduleType = selectedScheduleType,
-                scheduleMapJson = if (doseMap.isNotEmpty())
-                    JSONObject(doseMap as Map<*, *>).toString() else null,
-                intervalHours = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS)
-                    binding.editIntervalHours.text.toString().toIntOrNull() else null,
-                intervalDays = if (selectedScheduleType == SupplementScheduleType.EVERY_N_DAYS)
-                    intervalDays else null,
-                weekdays = if (selectedWeekdays.isNotEmpty())
-                    selectedWeekdays.sorted().joinToString(",") else null,
-                specificDates = JSONArray(specificDates).toString(),
-                startDate = selectedStartDate ?: SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-            )
 
-            viewModel.insert(supplement)
-            Toast.makeText(requireContext(), "Добавка сохранена", Toast.LENGTH_SHORT).show()
-            requireActivity().onBackPressedDispatcher.onBackPressed()
+        binding.buttonSave.setOnClickListener {
+            saveSupplement(null)
         }
     }
     private fun updateScheduleSummary() {
@@ -266,11 +268,13 @@ class AddSupplementFragment : Fragment() {
 
     private fun fillFields(s: Supplement) = with(binding) {
         savedScheduleJson = s.scheduleMapJson
-        s.scheduleMapJson?.let {
-            val obj = JSONObject(it)
-            doseMap.clear()
-            obj.keys().forEach { key -> doseMap[key] = obj.getString(key) }
-            updateScheduleSummary()
+        if (doseMap.isEmpty()) {
+            s.scheduleMapJson?.let {
+                val obj = JSONObject(it)
+                doseMap.clear()
+                obj.keys().forEach { key -> doseMap[key] = obj.getString(key) }
+                updateScheduleSummary()
+            }
         }
         selectedScheduleType = s.scheduleType
         spinnerScheduleType.setSelection(SupplementScheduleType.values().indexOf(s.scheduleType))
@@ -348,6 +352,18 @@ class AddSupplementFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+
+        parentFragmentManager.setFragmentResultListener("doseScheduleResult", viewLifecycleOwner) { _, bundle ->
+            val json = bundle.getString("doseMapJson") ?: return@setFragmentResultListener
+            val parsed = JSONObject(json)
+            doseMap.clear()
+            parsed.keys().forEach { key ->
+                doseMap[key] = parsed.getString(key)
+            }
+            updateScheduleSummary()
+        }
+
         updateSpecificDatesSummary()
         updateScheduleSummary()
         updateStartDateSummary()
