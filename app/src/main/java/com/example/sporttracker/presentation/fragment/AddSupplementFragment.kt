@@ -126,14 +126,6 @@ class AddSupplementFragment : Fragment() {
     }
     private fun saveSupplement(existing: Supplement?) {
         if (!validateRecord()) return
-        if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS && doseMap.size != 1) {
-            Toast.makeText(
-                requireContext(),
-                "Необходимо укажзать ровно только 1 принятие",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
         val name = binding.editName.text.toString().trim()
         val notes = binding.editNotes.text.toString().trim().ifEmpty { null }
         val scheduleJson = if (doseMap.isNotEmpty()) JSONObject(doseMap as Map<*, *>).toString() else null
@@ -251,6 +243,61 @@ class AddSupplementFragment : Fragment() {
         if (name.isBlank()) {
             Toast.makeText(requireContext(), "Введите название добавки", Toast.LENGTH_SHORT).show()
             return false
+        }
+
+        if (doseMap.isEmpty()) {
+            Toast.makeText(requireContext(), "Добавьте хотя бы одну запись \"время — доза\"", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        when (selectedScheduleType) {
+            SupplementScheduleType.EVERY_DAY ->{
+
+            }
+            SupplementScheduleType.EVERY_N_DAYS -> {
+                val days = binding.editIntervalDays.text.toString().toIntOrNull()
+                if (days == null || days <= 0) {
+                    Toast.makeText(requireContext(), "Введите интервал (в днях)", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+                if (selectedStartDate == null) {
+                    Toast.makeText(requireContext(), "Укажите дату начала", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
+
+            SupplementScheduleType.INTERVAL_HOURS -> {
+                val hours = binding.editIntervalHours.text.toString().toIntOrNull()
+                if (hours == null || hours <= 0) {
+                    Toast.makeText(requireContext(), "Введите интервал (в часах)", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+                if (doseMap.size != 1) {
+                    Toast.makeText(requireContext(), "Для режима \"через N часов\" допустима одна запись", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+                if (selectedStartDate == null) {
+                    Toast.makeText(requireContext(), "Укажите дату начала", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
+
+            SupplementScheduleType.SPECIFIC_DATES -> {
+                if (specificDates.isEmpty()) {
+                    Toast.makeText(requireContext(), "Выберите хотя бы одну дату", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
+            SupplementScheduleType.SPECIFIC_WEEKDAYS -> {
+                if (selectedWeekdays.isEmpty()) {
+                    Toast.makeText(requireContext(), "Выберите хотя бы один день недели", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
+            // если будет расширения типов интервалов
+            else -> {
+                Toast.makeText(requireContext(), "непредвиденный интервал", Toast.LENGTH_SHORT).show()
+            }
         }
         return true
     }
