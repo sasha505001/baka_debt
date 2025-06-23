@@ -40,7 +40,7 @@ class AddSupplementFragment : Fragment() {
     private var savedScheduleJson: String? = null
     private lateinit var types: List<SupplementScheduleType>
     private var ignoreNextScheduleSelection = false
-
+    private var lastLoadedSupplementId: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -51,7 +51,6 @@ class AddSupplementFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupScheduleSpinner()
         updateScheduleFieldsVisibility()
         setupDatePickers()
         setupUiListeners()
@@ -85,15 +84,25 @@ class AddSupplementFragment : Fragment() {
 
     private fun loadSupplementIfEditing() {
         val supplementId = arguments?.getInt("supplementId", -1) ?: -1
+
         if (supplementId != -1) {
-            viewModel.getSupplementById(supplementId).onEach { supplement ->
-                if (supplement != null) {
-                    fillFields(supplement)
-                    binding.buttonSave.setOnClickListener {
-                        saveSupplement(supplement)
+            if (lastLoadedSupplementId != supplementId) {
+                lastLoadedSupplementId = supplementId
+
+                viewModel.getSupplementById(supplementId).onEach { supplement ->
+                    if (supplement != null) {
+                        selectedScheduleType = supplement.scheduleType
+                        setupScheduleSpinner()
+                        fillFields(supplement)
+                        binding.buttonSave.setOnClickListener {
+                            saveSupplement(supplement)
+                        }
                     }
-                }
-            }.launchIn(viewLifecycleOwner.lifecycleScope)
+                }.launchIn(viewLifecycleOwner.lifecycleScope)
+            }
+        } else {
+            selectedScheduleType = SupplementScheduleType.EVERY_DAY
+            setupScheduleSpinner()
         }
     }
 
@@ -147,8 +156,6 @@ class AddSupplementFragment : Fragment() {
                 R.id.action_addSupplementFragment_to_supplementScheduleEditorFragment,
                 bundleOf(
                     "doseMapJson" to JSONObject(doseMap as Map<*, *>).toString(),
-                    "singleEntry" to (selectedScheduleType != SupplementScheduleType.SPECIFIC_WEEKDAYS),
-                    "scheduleType" to selectedScheduleType.name
                 )
             )
         }
@@ -363,18 +370,16 @@ class AddSupplementFragment : Fragment() {
     }
 
     private fun updateScheduleSummary() {
-        val summary = if (selectedScheduleType == SupplementScheduleType.INTERVAL_HOURS) {
-            val interval = binding.editIntervalHours.text.toString().toIntOrNull()
-            if (interval != null) "Каждые $interval ч" else "Не задано"
+        val summary = if (doseMap.isEmpty()) {
+            "Не задано"
         } else {
-            if (doseMap.isEmpty()) "Не задано"
-            else doseMap.entries.joinToString("\n") { (time, dose) -> "$time — $dose" }
+            doseMap.entries.joinToString("\n") { (time, dose) -> "$time — $dose" }
         }
-
         binding.textScheduleSummary.text = summary
     }
 
     private fun fillFields(s: Supplement) = with(binding) {
+        selectedScheduleType = s.scheduleType
         savedScheduleJson = s.scheduleMapJson
         if (doseMap.isEmpty()) {
             s.scheduleMapJson?.let {

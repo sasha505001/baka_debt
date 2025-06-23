@@ -56,19 +56,9 @@ class SupplementScheduleEditorFragment : Fragment() {
         binding.recyclerDoseList.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerDoseList.adapter = adapter
 
-        // кнопка "добавить"
         binding.buttonAdd.setOnClickListener {
-            if (scheduleType == "INTERVAL_HOURS" && doseMap.size >= 1) {
-                AlertDialog.Builder(requireContext())
-                    .setMessage("Для интервала по часам можно задать только одну запись.")
-                    .setPositiveButton("ОК", null)
-                    .show()
-            } else {
-                showAddDialog()
-            }
+            showAddDialog()
         }
-
-
     }
     private fun showAddDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_dose, null)
