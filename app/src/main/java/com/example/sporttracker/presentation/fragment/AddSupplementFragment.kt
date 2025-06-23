@@ -39,6 +39,7 @@ class AddSupplementFragment : Fragment() {
     private var selectedStartDate: String? = null
     private var savedScheduleJson: String? = null
     private lateinit var types: List<SupplementScheduleType>
+    private var ignoreNextScheduleSelection = false
 
 
     override fun onCreateView(
@@ -199,16 +200,15 @@ class AddSupplementFragment : Fragment() {
         binding.spinnerScheduleType.adapter = adapter
 
         // Установим выбранный тип, если он уже был задан
+        ignoreNextScheduleSelection = true
         binding.spinnerScheduleType.setSelection(types.indexOf(selectedScheduleType))
-
         binding.spinnerScheduleType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val newType = types[position]
+                if (ignoreNextScheduleSelection) {
+                    ignoreNextScheduleSelection = false
+                    return
+                }
                 if (newType != selectedScheduleType) {
                     selectedScheduleType = newType
                     updateScheduleFieldsVisibility()
@@ -384,8 +384,7 @@ class AddSupplementFragment : Fragment() {
                 updateScheduleSummary()
             }
         }
-        // selectedScheduleType = s.scheduleType
-        spinnerScheduleType.setSelection(SupplementScheduleType.values().indexOf(s.scheduleType))
+
         updateScheduleFieldsVisibility()
 
         selectedStartDate = s.startDate
