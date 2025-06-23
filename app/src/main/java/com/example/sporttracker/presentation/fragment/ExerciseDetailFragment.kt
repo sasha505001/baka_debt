@@ -16,6 +16,9 @@ import com.example.sporttracker.presentation.viewmodel.ExerciseViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import android.widget.MediaController
+import android.widget.Toast
+import com.example.sporttracker.R
 
 @AndroidEntryPoint
 class ExerciseDetailFragment : Fragment() {
@@ -55,6 +58,7 @@ class ExerciseDetailFragment : Fragment() {
             imageExercise.visibility = View.VISIBLE
             Glide.with(this@ExerciseDetailFragment)
                 .load(exercise.imageUrl)
+                .error(R.drawable.ic_broken_image)
                 .into(imageExercise)
         } else {
             imageExercise.visibility = View.GONE
@@ -63,8 +67,17 @@ class ExerciseDetailFragment : Fragment() {
         if (!exercise.videoUrl.isNullOrEmpty()) {
             videoExercise.visibility = View.VISIBLE
             videoExercise.setVideoURI(Uri.parse(exercise.videoUrl))
-            videoExercise.setOnPreparedListener { it.isLooping = true }
-            videoExercise.start()
+            val mediaController = MediaController(requireContext())
+            mediaController.setAnchorView(videoExercise)
+            videoExercise.setMediaController(mediaController)
+            videoExercise.setOnErrorListener { _, _, _ ->
+                Toast.makeText(requireContext(), "Ошибка при воспроизведении видео", Toast.LENGTH_SHORT).show()
+                true
+            }
+            videoExercise.setOnPreparedListener {
+                it.isLooping = true
+                videoExercise.start()
+            }
         } else {
             videoExercise.visibility = View.GONE
         }

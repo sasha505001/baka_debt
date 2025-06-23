@@ -45,6 +45,8 @@ class AddExerciseFragment : Fragment() {
                         currentExercise = it
                         binding.editName.setText(it.name)
                         binding.editDescription.setText(it.description)
+                        binding.editImageUrl.setText(it.imageUrl)
+                        binding.editVideoUrl.setText(it.videoUrl)
                     }
                 }
             }
@@ -53,17 +55,28 @@ class AddExerciseFragment : Fragment() {
         binding.buttonSave.setOnClickListener {
             val name = binding.editName.text.toString().trim()
             val description = binding.editDescription.text.toString().trim()
+            val imageUrl = binding.editImageUrl.text.toString().trim().ifEmpty { null }
+            val videoUrl = binding.editVideoUrl.text.toString().trim().ifEmpty { null }
 
             if (name.isNotEmpty()) {
                 val updated = currentExercise?.copy(
                     name = name,
-                    description = description
+                    description = description,
+                    imageUrl = imageUrl,
+                    videoUrl = videoUrl
                 )
                 if (updated != null) {
                     viewModel.update(updated)
                     Toast.makeText(requireContext(), "Упражнение обновлено", Toast.LENGTH_SHORT).show()
                 } else {
-                    viewModel.insert(Exercise(name = name, description = description))
+                    viewModel.insert(
+                        Exercise(
+                            name = name,
+                            description = description.ifEmpty { null },
+                            imageUrl = imageUrl,
+                            videoUrl = videoUrl
+                        )
+                    )
                     Toast.makeText(requireContext(), "Упражнение добавлено", Toast.LENGTH_SHORT).show()
                 }
                 findNavController().popBackStack()

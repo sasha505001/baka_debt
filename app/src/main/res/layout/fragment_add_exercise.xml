@@ -10,6 +10,7 @@
         android:id="@+id/editName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:hint="Название" />
 
     <EditText
@@ -19,6 +20,22 @@
         android:hint="Описание"
         android:inputType="textMultiLine"
         android:minLines="3"
+        android:layout_marginTop="12dp" />
+
+    <EditText
+        android:id="@+id/editImageUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="URL изображения"
+        android:minHeight="48dp"
+        android:layout_marginTop="12dp" />
+
+    <EditText
+        android:id="@+id/editVideoUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:hint="URL видео"
         android:layout_marginTop="12dp" />
 
     <Button
