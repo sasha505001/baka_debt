@@ -1,5 +1,6 @@
 package com.example.sporttracker.data.db
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.sporttracker.data.model.Exercise
@@ -19,4 +20,21 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
     abstract fun supplementDao(): SupplementDao
 
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = androidx.room.Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "app_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
 }

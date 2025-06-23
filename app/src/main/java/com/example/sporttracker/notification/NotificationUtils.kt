@@ -5,6 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
+import com.example.sporttracker.data.model.Supplement
 import java.util.Calendar
 
 
@@ -23,9 +25,50 @@ fun scheduleNotification(context: Context, title: String, message: String, timeI
 
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
-    } else {
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent)
+    try {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Точные уведомления отключены. Проверьте настройки энергосбережения.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    timeInMillis,
+                    pendingIntent
+                )
+            }
+            else -> {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    timeInMillis,
+                    pendingIntent
+                )
+            }
+        }
+
+    } catch (e: SecurityException) {
+        e.printStackTrace()
+        Toast.makeText(
+            context,
+            "Ошибка доступа к уведомлениям: ${e.localizedMessage}",
+            Toast.LENGTH_LONG
+        ).show()
     }
+}
+
+fun planSupplementNotifications(context: Context, supplement: Supplement) {
+    // Заглушка для восстановления уведомлений
 }

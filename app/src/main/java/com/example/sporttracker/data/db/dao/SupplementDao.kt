@@ -21,4 +21,7 @@ interface SupplementDao {
 
     @Delete
     suspend fun deleteSupplement(supplement: Supplement)
+
+    @Query("SELECT * FROM supplements")
+    suspend fun getAllSupplementsOnce(): List<Supplement>
 }
