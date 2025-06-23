@@ -5,6 +5,8 @@ import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
+import android.widget.TextView
+import android.widget.TimePicker
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -68,33 +70,39 @@ class SupplementScheduleEditorFragment : Fragment() {
 
 
     }
-
     private fun showAddDialog() {
-        val now = Calendar.getInstance()
-        TimePickerDialog(requireContext(),
-            { _, hour, minute ->
-                val time = String.format("%02d:%02d", hour, minute)
-                val input = EditText(requireContext()).apply { hint = "Дозировка" }
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_dose, null)
+        val textTime = dialogView.findViewById<TextView>(R.id.textTime)
+        val editDose = dialogView.findViewById<EditText>(R.id.editDose)
 
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Введите дозировку для $time")
-                    .setView(input)
-                    .setPositiveButton("Сохранить") { _, _ ->
-                        val dose = input.text.toString().trim()
-                        if (dose.isNotEmpty()) {
-                            doseMap[time] = dose
-                            updateList()
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-            },
-            now.get(Calendar.HOUR_OF_DAY),
-            now.get(Calendar.MINUTE),
-            true
-        ).show()
+        var selectedTime: String? = null
+
+        textTime.setOnClickListener {
+            val now = Calendar.getInstance()
+            TimePickerDialog(requireContext(),
+                { _, hour, minute ->
+                    selectedTime = String.format("%02d:%02d", hour, minute)
+                    textTime.text = "Время: $selectedTime"
+                },
+                now.get(Calendar.HOUR_OF_DAY),
+                now.get(Calendar.MINUTE),
+                true
+            ).show()
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Добавить приём")
+            .setView(dialogView)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val dose = editDose.text.toString().trim()
+                if (!selectedTime.isNullOrEmpty() && dose.isNotEmpty()) {
+                    doseMap[selectedTime!!] = dose
+                    updateList()
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
     }
-
     private fun updateList() {
         adapter = DoseAdapter(
             doseMap.toList(),
